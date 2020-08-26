@@ -15,4 +15,8 @@ class Team extends Model
     public function managers(){
         return $this->morphedByMany('App\Managers','assignable_team');
     }
+
+    public function projects(){
+        return $this->hasMany('App\Project','team_id','project_id');
+    }
 }

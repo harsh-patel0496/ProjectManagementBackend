@@ -44,4 +44,9 @@ Route::group([
         Route::post('/detachEmployee','TeamController@detachEmployee');
     });
     Route::apiResource('teams','TeamController');
+
+    Route::group(['prefix' => 'projects'], function(){
+        Route::get('/getListOfTeamsAndClients','ProjectController@getListOfTeamsAndClients');
+    });
+    Route::apiResource('projects','ProjectController');
 });

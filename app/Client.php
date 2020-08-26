@@ -40,4 +40,8 @@ class Client extends Model
         return $this->belongsTo('App\User','parent_user');
     }
 
+    public function projects(){
+        return $this->hasMany('App\Project','client_id');
+    }
+
 }
