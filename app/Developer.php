@@ -45,4 +45,8 @@ class Developer extends Model
     public function teams(){
         return $this->morphToMany('App\Team','assignable_team');
     }
+
+    public function tasks(){
+        return $this->morphToMany('App\Task','assignable_tasks');
+    }
 }

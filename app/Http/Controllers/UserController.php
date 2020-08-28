@@ -214,7 +214,8 @@ class UserController extends Controller
                 'developers' => function ($query) {
                     $query->where('role', 3);
         
-                }
+                },
+                'projects'
             ]
         );
         return ResponseJson::success('','assembly',$assembly);

@@ -59,4 +59,20 @@ class User extends Authenticatable
     public function developers(){
         return $this->hasMany('App\Developer','parent_user');
     }
+
+    public function projects(){
+        return $this->hasMany('App\Project','company_id');
+    }
+
+    public function comments(){
+        return $this->hasMany('App\Comment','user_id');
+    }
+
+    public function tasks(){
+        return $this->hasMany('App\Task','company_id');
+    }
+
+    public function createdTasks(){
+        return $this->hasMany('App\Task','created_by');
+    }
 }

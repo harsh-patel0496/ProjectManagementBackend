@@ -47,6 +47,17 @@ Route::group([
 
     Route::group(['prefix' => 'projects'], function(){
         Route::get('/getListOfTeamsAndClients','ProjectController@getListOfTeamsAndClients');
+        Route::get('/getProjectWithTaskForDashboard','ProjectController@getProjectWithTaskForDashboard');
     });
     Route::apiResource('projects','ProjectController');
+
+    Route::group(['prefix' => 'comments'], function(){
+        Route::get('/{project_id}','CommentController@index');
+    });
+    Route::apiResource('comments','CommentController');
+
+    Route::group(['prefix' => 'tasks'], function(){
+        Route::get('/{project_id}','TaskController@index');
+    });
+    Route::apiResource('tasks','TaskController');
 });

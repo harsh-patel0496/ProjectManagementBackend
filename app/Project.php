@@ -19,4 +19,8 @@ class Project extends Model
     public function teams(){
         return $this->belongsToMany('App\Team','project_team_pivote','project_id','team_id');
     }
+
+    public function comments(){
+        return $this->morphToMany('App\Comment','commentables');
+    }
 }

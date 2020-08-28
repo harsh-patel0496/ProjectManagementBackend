@@ -27,23 +27,7 @@ class ProjectController extends Controller
     
     public function index()
     {
-        $projects = $this->project
-                        ->where('company_id',auth('api')->user()->id)
-                        ->with('client')
-                        ->with(['teams' => function($query){
-                            $query->withCount('developers');
-                        }])->orderBy('projects.id','desc')->get()->toArray();
-        //echo"<pre>";print_r($projects);
-        foreach($projects as $key => $project){
-            $count = 0;
-            if(!empty($project['teams'])){
-                foreach($project['teams'] as $k => $team){
-                    $count = $count + $team['developers_count']; 
-                }
-            }
-            $projects[$key]['start_date'] = date('d-m-Y',strtotime($projects[$key]['start_date']));
-            $projects[$key]['totalDevelopers'] = $count;
-        }
+        $projects = $this->getProjectWithAssembly([],true);
         return ResponseJson::success('','projects',$projects);
     }
 
@@ -63,20 +47,8 @@ class ProjectController extends Controller
             if(!empty($newProject)){
                 $this->assignProjectToTeam($newProject,$teams);
             }
-            $project = $this->project
-                        ->where('projects.id',$newProject->id)
-                        ->with('client')
-                        ->with(['teams' => function($query){
-                            $query->withCount('developers');
-                        }])->first()->toArray();
-            $count = 0;
-            if(!empty($project['teams'])){
-                foreach($project['teams'] as $k => $team){
-                    $count = $count + $team['developers_count']; 
-                }
-            }
-            $project['start_date'] = date('d-m-Y',strtotime($project['start_date']));
-            $project['totalDevelopers'] = $count;
+            
+            $project = $this->getProjectWithAssembly($newProject);
             return ResponseJson::success('','project',$project);
         } catch(Exception $e){
 
@@ -104,7 +76,17 @@ class ProjectController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        try{
+            $dataToSave = Material::ProjectStore($request);
+            $updatedProject = tap($this->project->where('id',$id))->update($dataToSave)->first();
+            if(!empty($updatedProject)){
+                $this->syncWithProjects($updatedProject,$request);
+            }
+            $project = $this->getProjectWithAssembly($updatedProject);
+            return ResponseJson::success('Project Updated Successfully!','project',$project);
+        } catch(Excention $e){
+            return ResponseJson::error();
+        }
     }
 
     /**
@@ -136,10 +118,83 @@ class ProjectController extends Controller
 
         $teams = Team::where('company_id',$user)
                     ->select('id','name','company_id')
+                    ->with('developers')
+                    ->with('managers')
                     ->orderBy('name','asc')
                     ->get();
 
         $assembly = ['clients' => $clients,'teams' => $teams];
         return ResponseJson::success('','assembly',$assembly);
+    }
+
+    public function syncWithProjects($project,$request){
+        $teams = $request->input('teams');
+        if(!empty($teams)){
+            $toBeSyncTeams = [];
+            foreach($teams as $key => $team){
+                $toBeSyncTeams[] = $team['id'];
+            }
+            $project->teams()->sync($toBeSyncTeams);
+        }
+    }
+
+    public function getProjectWithAssembly($newProject = [],$list = false){
+        if($list){
+            $projects = $this->project
+                        ->where('company_id',auth('api')->user()->id)
+                        ->with('client')
+                        ->with(['teams' => function($query){
+                            $query->withCount('developers')->withCount('managers');
+                        }])
+                        ->withCount('tasks')
+                        ->orderBy('projects.id','desc')->get()->toArray();
+            foreach($projects as $key => $project){
+                $count = 0;
+                if(!empty($project['teams'])){
+                    foreach($project['teams'] as $k => $team){
+                        $count = $count + $team['developers_count'] + $team['managers_count']; 
+                    }
+                }
+                $projects[$key]['start_date'] = date('d-m-Y',strtotime($projects[$key]['start_date']));
+                $projects[$key]['totalTeamMembers'] = $count;
+            }
+
+            return $projects;
+        } else {
+            $project = $this->project
+                        ->where('projects.id',$newProject->id)
+                        ->with('client')
+                        ->with(['teams' => function($query){
+                            $query->withCount('developers')->withCount('managers');
+                        }])->first()->toArray();
+            $count = 0;
+            if(!empty($project['teams'])){
+                foreach($project['teams'] as $k => $team){
+                    $count = $count + $team['developers_count'] + $team['managers_count']; 
+                }
+            }
+            $project['start_date'] = date('d-m-Y',strtotime($project['start_date']));
+            $project['totalTeamMembers'] = $count;
+            return $project;
+        }
+       
+    }
+
+    public function getProjectWithTaskForDashboard(){
+        $companyId = auth('api')->user()->role == 0 ? auth('api')->user()->id : auth('api')->user()->parent_user;
+        $projects = $this->project
+                            ->where('company_id',$companyId)
+                            ->get();
+        $data = [];
+        if(!empty($projects)){
+            foreach($projects as $key => $project){
+                $data['labels'][] =  $project->title;
+                $data['datasets'][0][] = $project->tasks()->where('type',1)->count();
+                $data['datasets'][1][] = $project->tasks()->where('type',2)->count();
+                $data['datasets'][2][] = $project->tasks()->where('type',3)->count();
+            }
+            
+        }
+        return ResponseJson::success('','projects',$data);
     }
 }

@@ -11,7 +11,7 @@
             $data = $request->all();
             $project['title'] = $data['title'];
             $project['description'] = $data['description'];
-            $project['company_id'] = auth('api')->user()->id;
+            $project['company_id'] = auth('api')->user()->role == 0 ? auth('api')->user()->id : NULL;
             $project['start_date'] = date('Y-m-d H:i:s',strtotime($data['start_date']));
             
             if(isset($data['client'])){

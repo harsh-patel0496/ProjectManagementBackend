@@ -11,7 +11,7 @@
             $data = $request->all();
             $team['name'] = $data['name'];
             $team['description'] = $data['description'];
-            $team['company_id'] = auth('api')->user()->id;
+            $team['company_id'] = auth('api')->user()->role == 0 ? auth('api')->user()->id : NULL;
             return $team;
         }
         
