@@ -157,6 +157,17 @@ class ProjectController extends Controller
                 }
                 $projects[$key]['start_date'] = date('d-m-Y',strtotime($projects[$key]['start_date']));
                 $projects[$key]['totalTeamMembers'] = $count;
+                $totalTasks = $this->project->find($project['id'])->tasks()->count();
+                $cancelledTasks = $this->project->find($project['id'])->tasks()->where('type',4)->count();
+                $completedTasks = $this->project->find($project['id'])->tasks()->where('type',3)->count();
+                if($totalTasks > 0){
+                    $progress = ($completedTasks * 100)/($totalTasks - $cancelledTasks);
+                } else {
+                    $progress = 0;
+                }
+                
+                $projects[$key]['progress'] = $progress;
+
             }
 
             return $projects;
