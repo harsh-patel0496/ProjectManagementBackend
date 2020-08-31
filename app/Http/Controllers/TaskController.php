@@ -24,9 +24,9 @@ class TaskController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($project_id)
+    public function index($project_id,$view = '')
     {
-        $taskWithProjects = $this->taskWithProjects($project_id);
+        $taskWithProjects = $this->taskWithProjects($project_id,$view);
         return ResponseJson::success('','tasks',$taskWithProjects);
     }
 
@@ -107,16 +107,21 @@ class TaskController extends Controller
         }
     }
 
-    protected function taskWithProjects($project_id){
-        $taskWithUser = $this->task->with('projects')->whereHas('projects' , function($query) use ($project_id){
+    protected function taskWithProjects($project_id,$view = false){
+        $taskWithProjects = $this->task->with('projects')->whereHas('projects' , function($query) use ($project_id){
             $query->where('projects.id',$project_id);
         })->orderBy('tasks.priority', 'desc')->get();
 
         //dd($taskWithUser);
-        $finalArray = [];
-        foreach($taskWithUser as $task){
-            $finalArray[$task->type][] = $task;
+        if($view == 'project'){
+            return $taskWithProjects;
+        } else {
+            $finalArray = [];
+            foreach($taskWithProjects as $task){
+                $finalArray[$task->type][] = $task;
+            }
+            return $finalArray;
         }
-        return $finalArray;
+        
     }
 }

@@ -57,7 +57,7 @@ Route::group([
     Route::apiResource('comments','CommentController');
 
     Route::group(['prefix' => 'tasks'], function(){
-        Route::get('/{project_id}','TaskController@index');
+        Route::get('/{project_id}/{view?}','TaskController@index');
     });
     Route::apiResource('tasks','TaskController');
 });
