@@ -60,4 +60,7 @@ Route::group([
         Route::get('/{project_id}/{view?}','TaskController@index');
     });
     Route::apiResource('tasks','TaskController');
+
+
+    Route::apiResource('messages','MessageController');
 });

@@ -10,7 +10,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 class User extends Authenticatable
 {
     use HasApiTokens,Notifiable;
-
+    protected $connection = 'mysql';
     /**
      * The attributes that are mass assignable.
      *
@@ -74,5 +74,9 @@ class User extends Authenticatable
 
     public function createdTasks(){
         return $this->hasMany('App\Task','created_by');
+    }
+
+    public function messages(){
+        return $this->morphToMany('App\Message','messagable');
     }
 }
