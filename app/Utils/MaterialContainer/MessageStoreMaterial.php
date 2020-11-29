@@ -10,8 +10,14 @@
             $data = $request->all();
             
             $message['message'] = $data['message'];
-            $message['user_id'] = auth('api')->user()->id;
-            $message['read'] = false;
+            $message['sender_id'] = auth('api')->user()->id;
+            $message['read'] = 0;
+
+            if($data['is_team']){
+                $message['team_id'] = $data['team_id'];
+            } else {
+                $message['receiver_id'] =  $data['receiver_id'];
+            }
             $message['created_at'] = date('Y-m-d H:i:s');
             $message['updated_at'] = date('Y-m-d H:i:s');
 

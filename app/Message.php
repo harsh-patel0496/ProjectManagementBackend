@@ -2,11 +2,11 @@
 
 namespace App;
 
-use Jenssegers\Mongodb\Eloquent\Model;
+//use Jenssegers\Mongodb\Eloquent\Model;
+use Illuminate\Database\Eloquent\Model;
 
 class Message extends Model
 {
-    protected $connection = 'mongodb';
     protected $guarded = [];
 
     public function friends(){
@@ -14,7 +14,7 @@ class Message extends Model
     }
 
     public function teams(){
-        return $this->morphedByMany('App\Teams','messagable');
+        return $this->morphedByMany('App\Team','messagable');
     }
 
 }

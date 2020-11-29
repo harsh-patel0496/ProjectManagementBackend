@@ -61,6 +61,20 @@ Route::group([
     });
     Route::apiResource('tasks','TaskController');
 
-
+    Route::group(['prefix' => 'messages'], function(){
+        
+        Route::get('/getFriendList','MessageController@getFriendList');
+        Route::get('/{active_chat}/{isTeam?}','MessageController@index');
+        Route::post(
+            '/inviteFriendsForChat',
+            'MessageController@inviteFriendsForChat'
+        );
+        Route::put(
+            '/acceptInvite/{friend_id}',
+            'MessageController@acceptInvite'
+        );
+    });
+    
     Route::apiResource('messages','MessageController');
+    Route::apiResource('items','ItemController');
 });

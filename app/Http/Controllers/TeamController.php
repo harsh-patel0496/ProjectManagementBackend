@@ -8,6 +8,7 @@ use Illuminate\Validation\Rule;
 
 use App\Team;
 use App\Employee;
+use App\User;
 
 use App\Facades\ResponseJson;
 use App\Facades\Material;
@@ -151,13 +152,19 @@ class TeamController extends Controller
 
         $managers = $request->input('managers');
         $developers = $request->input('developers');
+        $primeUser = auth('api')->user();
+        if($primeUser->role == 0){
+            $primeUser->chatGroups()->attach($team->id,['chated_at' => date('Y:m:d H:i:s'),'accept_invite' => 1]);
+        }
         if(!empty($managers)){
             foreach($managers as $key => $manager){
+                User::find($manager['id'])->chatGroups()->attach($team->id,['chated_at' => date('Y:m:d H:i:s'),'accept_invite' => 1]);
                 $team->managers()->attach($manager['id']);
             }
         }
         if(!empty($developers)){
             foreach($developers as $key => $developer){
+                User::find($developer['id'])->chatGroups()->attach($team->id,['chated_at' => date('Y:m:d H:i:s'),'accept_invite' => 1]);
                 $team->developers()->attach($developer['id']);
             }
         }

@@ -79,4 +79,12 @@ class User extends Authenticatable
     public function messages(){
         return $this->morphToMany('App\Message','messagable');
     }
+
+    public function friends(){
+        return $this->morphedByMany('App\User','friendable');
+    }
+
+    public function chatGroups(){
+        return $this->morphedByMany('App\Team','friendable');
+    }
 }

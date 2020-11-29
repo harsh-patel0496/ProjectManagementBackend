@@ -175,6 +175,7 @@ class ProjectController extends Controller
             $project = $this->project
                         ->where('projects.id',$newProject->id)
                         ->with('client')
+                        ->withCount('tasks')
                         ->with(['teams' => function($query){
                             $query->withCount('developers')->withCount('managers');
                         }])->first()->toArray();
@@ -186,6 +187,17 @@ class ProjectController extends Controller
             }
             $project['start_date'] = date('d-m-Y',strtotime($project['start_date']));
             $project['totalTeamMembers'] = $count;
+            $totalTasks = $this->project->find($project['id'])->tasks()->count();
+            $cancelledTasks = $this->project->find($project['id'])->tasks()->where('type',4)->count();
+            $completedTasks = $this->project->find($project['id'])->tasks()->where('type',3)->count();
+            if($totalTasks > 0){
+                $progress = ($completedTasks * 100)/($totalTasks - $cancelledTasks);
+            } else {
+                $progress = 0;
+            }
+            
+            $project['progress'] = $progress;
+
             return $project;
         }
        

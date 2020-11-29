@@ -23,4 +23,8 @@ class Team extends Model
     public function tasks(){
         return $this->hasMany('App\Task','team_id');
     }
+
+    public function messages(){
+        return $this->morphToMany('App\Message','messagable');
+    }
 }
